@@ -17,52 +17,6 @@
 
 
     var procs = [
-      {key: "model", 
-       func: "if (typeof user.kpmodel === 'undefined'){\n"
-             +"  user.kpmodel=1.5, user.taup=100, user.theta = []; user.outputStart = 5;\n"
-             +"  for(var i=0;i<50;i++){ user.theta[i]=user.outputStart }\n"
-             +"}\n"
-             +"user.theta[30]=output;\n"
-             +"for(var i=0;i<49;i++){ user.theta[i] = user.theta[i+1] };\n"             
-             +"return (user.kpmodel / user.taup) *(user.theta[0]-user.outputStart) + input*(1-1/user.taup) + (Math.random()-0.5)*0.02",                             
-       sampletime: 100,
-       noise: 0,
-       setpoint: 100, 
-       Kp: 2,
-       Ki: 0.5,
-       Kd: 2, 
-       Direction: 1,
-      },
-      {key: "sinus", 
-       func: "return (Math.sin(time/1000)-0.5)*50 + noise + output",                 
-       sampletime: 50,
-       setpoint: 50,
-       noise: 0, 
-       Kp: 0.7,
-       Ki: 10,
-       Kd: 0, 
-       Direction: 1,
-      },                                                                   
-      {key: "step", 
-       func: "if (time % 5000 < 2500) return 50+output+noise; else return 100+output+noise",                 
-       sampletime: 50,
-       setpoint: 100,
-       noise: 0, 
-       Kp: 0.1,
-       Ki: 10,
-       Kd: 0, 
-       Direction: 1,
-      },
-      {key: "motorspeed", 
-       func: "if (Math.abs(output) > 20) return output-20*Math.sign(output)+noise; else return 0",                 
-       sampletime: 50,
-       setpoint: 100,
-       noise: 0, 
-       Kp: 0.1,
-       Ki: 10,
-       Kd: 0, 
-       Direction: 1,
-      },
       {key: "watertank 1", 
        func: "pid.outMax = 100.0;\n"
             +"pid.outMin = 0.0;\n\n"
@@ -198,8 +152,16 @@ function addPlotData(myplot, data){
 function process(){      
   time = (new Date).getTime();
   $("#time").text( time );
-  if (run) {                        
-    noise = (Math.random() - 0.5) * $("#sliderNoise").slider("value");
+  if (run) {
+    var noiseStrength = $("#sliderNoise").slider("value");
+    var i;
+    var samples = 10;
+    var sum = 0.0;
+    for (i = 0; i < samples; i++) {
+      sum += (Math.random() - 0.5) * noiseStrength;
+    }
+    noise = sum / samples;
+
     //input = Math.sin(time/1000)*40 + noise + output;
     input = proc.compute(time, input, noise, output, user);
     
@@ -231,6 +193,11 @@ function process(){
     addPlotData(plInput, input);
     addPlotData(plSetpoint, setpoint);
     addPlotData(plOutput, output);
+
+    if (control) {
+      $("#sliderOutput").slider("value", output);
+      $("#output").text( $("#sliderOutput").slider("value") );
+    }
   }
   setTimeout(process, sampleTime);      
 }
@@ -264,6 +231,13 @@ function setpointChanged(){
   updateSliderText();    
 }
 
+function outputChanged(){
+  output = $("#sliderOutput").slider("value");
+  console.log("output "+output);
+  pid.setOutput(output);
+  updateSliderText();    
+}
+
 function tuningsChanged(){  
   Kp  = $("#sliderKp").slider("value");    
   Ki  = $("#sliderKi").slider("value");
@@ -290,6 +264,7 @@ function processFuncChanged(){
 function updateSliderText(){
   $("#process").text( procs[$("#sliderProcess").slider("value")].key );   
   $("#setpoint").text( $("#sliderSetpoint").slider("value") );
+  $("#output").text( $("#sliderOutput").slider("value") );
   $("#noise").text( $("#sliderNoise").slider("value") );  
   $("#sampletime").text( $("#sliderSampletime").slider("value") );  
   $("#kp").text( $("#sliderKp").slider("value") );
@@ -356,12 +331,10 @@ $(document).ready(function(){
     });                  
     
     // plots
-    initPlot(0, "plot1", "control input", plInput, 'rgba(255,0,0,1)', 0,200,1);
+    initPlot(0, "plot1", "control input", plInput, 'rgba(255,0,0,1)', 0,200,0);
     initPlot(1, "plot1", "control setpoint", plSetpoint, 'rgba(0,0,255,1)', 0,200,0);
     initPlot(2, "plot1", "control output", plOutput, 'rgba(0,255,0,1)', 0,200,0);
 
-    //$("#ip").val(IP);
-    
     $( "#sliderProcess" ).slider({
         min: 0,
         max: procs.length-1,
@@ -389,14 +362,23 @@ $(document).ready(function(){
     });                                                  
     
     $( "#sliderSetpoint" ).slider({
-        min: -180,
+        min: -20,
         max: 180,
         step: 1,
         value: 50,
         slide: function( event, ui ) { setpointChanged(); },
         change:  function( event, ui ) { setpointChanged(); },                  
     });                  
-    
+
+    $( "#sliderOutput" ).slider({
+        min: 0,
+        max: 100,
+        step: 1,
+        value: 50,
+        slide: function( event, ui ) { outputChanged(); },
+        change:  function( event, ui ) { outputChanged(); },                  
+    });                  
+
     
     $( "#sliderKp" ).slider({
         min: 0,
@@ -454,7 +436,7 @@ Also, you can adjust the process model by Javascript code below. This simulator 
 <a href="https://github.com/br3ttb/Arduino-PID-AutoTune-Library">Arduino-PID-AutoTune-Library</a> to Javascript.     
 
 <div id="plots">
-  <canvas id="plot1" width="1000" height="600"></canvas>    
+  <canvas id="plot1" width="800" height="600"></canvas>    
 </div>  
 
 <button id="start">Start</button>
@@ -462,12 +444,13 @@ Also, you can adjust the process model by Javascript code below. This simulator 
 <button id="toggle">PID is ON</button>
 time:<span id="time">1568816071278</span>
 
+<!--
 <button id="autotune">Auto tune is OFF</button>
 tune step <input id="tunestep" type="textbox" size="4" value="50">
 tune noise <input id="tunenoise" type="textbox" size="4" value="1">
 tune start <input id="tunestart" type="textbox" size="4" value="100">
 tune loopback (sec) <input id="tuneloopback" type="textbox" size="4" value="20">
-
+-->
 <p>
 
 <span style="float:left;margin-right:10px">
@@ -489,25 +472,31 @@ tune loopback (sec) <input id="tuneloopback" type="textbox" size="4" value="20">
 </div>
 
 <div>
+  Output:
+  <span id="output">36</span> %
+  <div style="width:600px" id="sliderOutput" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 60%;"></span></div>
+</div>
+
+<div>
     Noise:
   <span id="noise">0</span>
   <div style="width:600px" id="sliderNoise" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 0%;"></span></div>
 </div>
   
 <div>
-  Kp (proportional gain):
+  P (proportional gain):
   <span id="kp">0.99</span>
   <div style="width:600px" id="sliderKp" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 19.8%;"></span></div>
 </div>
 
 <div>
-  Ki (integral gain):
+  I (integral gain):
   <span id="ki">0</span>
   <div style="width:600px" id="sliderKi" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 0%;"></span></div>
 </div>
 
 <div>
-  Kd (derivative gain):
+  D (derivative gain):
   <span id="kd">0</span>
   <div style="width:600px" id="sliderKd" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 0%;"></span></div>
 </div>
