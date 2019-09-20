@@ -436,7 +436,7 @@ Also, you can adjust the process model by Javascript code below. This simulator 
 <a href="https://github.com/br3ttb/Arduino-PID-AutoTune-Library">Arduino-PID-AutoTune-Library</a> to Javascript.     
 
 <div id="plots">
-  <canvas id="plot1" width="800" height="600"></canvas>    
+  <canvas style="border: 3px solid black" id="plot1" width="800" height="600"></canvas>    
 </div>  
 
 <button id="start">Start</button>
@@ -462,43 +462,49 @@ tune loopback (sec) <input id="tuneloopback" type="textbox" size="4" value="20">
 <span>  
   Sample time (ms):
   <span style="display:inline-block;width:40px" id="sampletime">50</span>
-  <div style="display:inline-block;width:100px;margin-left:10px" id="sliderSampletime" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 0%;"></span></div>
+  <div style="display:inline-block;width:250px;margin-left:10px" id="sliderSampletime" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 0%;"></span></div>
 </span>
 
 <div>
-  Setpoint:
-  <span id="setpoint">36</span>
-  <div style="width:600px" id="sliderSetpoint" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 60%;"></span></div>
+  <div style="display:inline-block;width: 200px;text-align: right">
+    Setpoint: <span style="display:inline-block;width:40px" id="setpoint">36</span>
+  </div>
+  <div style="display:inline-block;width:600px;margin-top: 10px;margin-left: 20px" id="sliderSetpoint" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 60%;"></span></div>
 </div>
 
 <div>
-  Output:
-  <span id="output">36</span> %
-  <div style="width:600px" id="sliderOutput" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 60%;"></span></div>
+  <div style="display:inline-block;width: 200px;text-align: right">
+    Output: <span style="display:inline-block;width:40px" id="output">36</span>
+  </div>
+  <div style="display:inline-block;width:600px;margin-top: 10px;margin-left: 20px" id="sliderOutput" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 60%;"></span></div>
 </div>
 
 <div>
-    Noise:
-  <span id="noise">0</span>
-  <div style="width:600px" id="sliderNoise" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 0%;"></span></div>
+  <div style="display:inline-block;width: 200px;text-align: right">
+    Noise: <span style="display:inline-block;width:40px" id="noise">0</span>
+  </div>
+  <div style="display:inline-block;width:600px;margin-top: 10px;margin-left: 20px" id="sliderNoise" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 0%;"></span></div>
 </div>
   
 <div>
-  P (proportional gain):
-  <span id="kp">0.99</span>
-  <div style="width:600px" id="sliderKp" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 19.8%;"></span></div>
+  <div style="display:inline-block;width: 200px;text-align: right">
+  P (proportional gain): <span style="display:inline-block;width:40px" id="kp">0.99</span>
+  </div>
+  <div style="display:inline-block;width:600px;margin-top: 10px;margin-left: 20px" id="sliderKp" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 19.8%;"></span></div>
 </div>
 
 <div>
-  I (integral gain):
-  <span id="ki">0</span>
-  <div style="width:600px" id="sliderKi" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 0%;"></span></div>
+  <div style="display:inline-block;width: 200px;text-align: right">
+  I (integral gain): <span style="display:inline-block;width:40px" id="ki">0</span>
+  </div>
+  <div style="display:inline-block;width:600px;margin-top: 10px;margin-left: 20px" id="sliderKi" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 0%;"></span></div>
 </div>
 
 <div>
-  D (derivative gain):
-  <span id="kd">0</span>
-  <div style="width:600px" id="sliderKd" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 0%;"></span></div>
+  <div style="display:inline-block;width: 200px;text-align: right">
+  D (derivative gain): <span style="display:inline-block;width:40px" id="kd">0</span>
+  </div>
+  <div style="display:inline-block;width:600px;margin-top: 10px;margin-left: 20px" id="sliderKd" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 0%;"></span></div>
 </div>
 
 <br>
