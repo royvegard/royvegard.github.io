@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
-////// created by Jan £ukasz Górski, janlgorski@gmail.com, http://mathmed.blox.pl 100% opensource //////
+////// created by Jan ï¿½ukasz Gï¿½rski, janlgorski@gmail.com, http://mathmed.blox.pl 100% opensource //////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // version 01.02.2012
 /*
@@ -69,7 +69,7 @@ this.drawGrid = function() {
   ctx.beginPath();
 
 
-  spacH = this.spacing("horizontal",this.data.length);
+  spacH = this.spacing("horizontal",this.data.length) * 10;
 	for(var i=0, len = this.data.length; i<len;i++) {	
 	  precalc = i*spacH+this.offsetL;
 	  ctx.moveTo(precalc,1);
@@ -80,7 +80,7 @@ this.drawGrid = function() {
 	for(var i=0;i<this.horizontalNR;i++) {		  
     precalc = i*spacV;    
 	  ctx.moveTo(1,precalc);
-	  ctx.lineTo(wid-spacH,precalc);    
+	  ctx.lineTo(wid,precalc);    
 	}
   
   ctx.stroke();
@@ -95,8 +95,8 @@ this.drawGrid = function() {
   var zero = hei-(0-range[0])*verticalCoefficient+spacVertic; 	
   ctx.beginPath();  
   ctx.strokeStyle = 'gray'; 
-  ctx.moveTo(35,zero);
-	ctx.lineTo(wid-spacH,zero);
+  ctx.moveTo(1,zero);
+	ctx.lineTo(wid,zero);
   ctx.stroke();   
   ctx.closePath();           
 }

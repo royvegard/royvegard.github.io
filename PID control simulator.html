@@ -74,7 +74,7 @@
             +"    if (user.h_1 > 0.0) {\n"
             +"        user.q_out = 1.6e-2 * output * user.k * Math.sqrt(user.h_1);\n"
             +"        user.dh =  user.dt * (user.q_in - user.q_out) / user.F;\n"
-            +"        user.h = user.h + user.dh;\n\n"
+            +"        user.h = user.h + user.dh;\n"
             +"    }\n"
             +"    else {\n"
             +"        user.h_1 = 0.0001;\n"
@@ -130,7 +130,6 @@ function initPlot(seriesidx, id, seriesname, myplot, plotcolor, rangemin, rangem
   myplot.rangeMin = rangemin;
   myplot.rangeMax = rangemax;
   myplot.data = series;
-  //myplot.plotColor = 'rgba(200,230,50,1)';
   myplot.plotColor = plotcolor;
   myplot.enumerateP = 0;
   myplot.gridColor =  'rgba(0,0,0,0.075)';
