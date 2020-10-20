@@ -8,6 +8,7 @@
 <style>
 </style>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.5.1/gsap.min.js"></script>
 <script src="./PID control simulator_files/jquery.min.js"></script>
 <script src="./PID control simulator_files/jquery-ui.min.js"></script>
 <script src="./PID control simulator_files/plot.js"></script>
@@ -197,6 +198,9 @@ function process(){
       $("#output").text( $("#sliderOutput").slider("value") );
     }
   }
+
+  animateDrawing();
+
   setTimeout(process, sampleTime);
 }
 
@@ -435,7 +439,85 @@ Also, you can adjust the process model by Javascript code below. This simulator 
 
 <div id="plots">
   <canvas style="border: 3px solid black" id="plot1" width="800" height="600"></canvas>
+  <svg xmlns="http://www.w3.org/2000/svg" width="400" height="600">
+    <!--rect width="100%" height="100%" style="fill:none; stroke:black; stroke-width:3" /-->
+    <g id="tank" transform="translate(50, 450)">
+      <polygon id="fluid" points="0,-180 0,0 200,0 200,-180" style="fill:red" />
+      <polyline points="0,-300 0,0 200,0 200,-300" style="stroke:black; stroke-width:3; fill:none" />
+      <polyline points="100,0 100,70 250,70" style="stroke:black; stroke-width:15; fill:none" />
+      <polyline points="100,-320 100,-350 250,-350" style="stroke:black; stroke-width:15; fill:none" />
+      
+    </g>
+
+    <g id="valve_in" style="fill:#00ff00; stroke:black; stroke-width:2" transform="translate(300, 80)">
+      <line x1="30" y1="20" x2="30" y2="-20" />
+      <polygon points="0,0 0,40 60,0 60,40 0,0"  />
+      <path id="diaphragm_in" transform="translate(0, -20)" d="M 10 0 Q 30 -100 50 0 Z" />
+    </g>
+
+    <g id="valve_out" style="fill:#0000ff; stroke:black; stroke-width:2" transform="translate(300, 500)">
+      <line x1="30" y1="20" x2="30" y2="-20" />
+      <polygon points="0,0 0,40 60,0 60,40 0,0"  />
+      <path id="diaphragm_out" transform="translate(0, -20)" d="M 10 0 Q 30 -100 50 0 Z" />
+    </g>
+
+  </svg>
 </div>
+
+<script>
+  let tankFluid = document.getElementById("fluid");
+  let valveIn = document.getElementById("valve_in");
+  let valveOut = document.getElementById("valve_out");
+  let diaphragmIn = document.getElementById("diaphragm_in");
+  let diaphragmOut = document.getElementById("diaphragm_out");
+  let activeDiaphragm = diaphragmIn;
+
+  function animateDrawing() {
+    if (proc.key == "watertank 1") {
+      activeDiaphragm = diaphragmIn;
+
+      gsap.set(diaphragmOut, {
+        attr: {
+          d: "M 10 0 Q 30 -60 50 0 Z"
+        }
+      });
+      gsap.set(valveIn, {
+        fill: "#00ff00"
+      });
+      gsap.set(valveOut, {
+        fill: "#000000"
+      });
+    } else if (proc.key == "watertank 2") {
+      activeDiaphragm = diaphragmOut;
+
+      gsap.set(diaphragmIn, {
+        attr: {
+          d: "M 10 0 Q 30 -25 50 0 Z"
+        }
+      });
+      gsap.set(valveIn, {
+        fill: "#000000"
+      });
+      gsap.set(valveOut, {
+        fill: "#00ff00"
+      });
+
+    }
+
+    gsap.set(activeDiaphragm, {
+      attr: {
+        d: "M 10 0 Q 30 " + (-output) + " 50 0 Z"
+      }
+    });
+
+    gsap.set(tankFluid, {
+      attr: {
+        points: "0," + (-input*1.3) + " 0,0 200,0 200," + (-input*1.3)
+      }
+    });
+
+  }
+</script>
 
 <button id="start">Start</button>
 <button id="stop">Stop</button>
@@ -456,14 +538,14 @@ time:<span id="time">1568816071278</span>
 </span>
 
 <div>
-  <div style="display:inline-block;width: 200px;text-align: right">
+  <div style="display:inline-block;width: 200px;text-align: right; color:blue">
     Setpoint: <span style="display:inline-block;width:40px" id="setpoint">36</span>
   </div>
   <div style="display:inline-block;width:600px;margin-top: 10px;margin-left: 20px" id="sliderSetpoint" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 60%;"></span></div>
 </div>
 
 <div>
-  <div style="display:inline-block;width: 200px;text-align: right">
+  <div style="display:inline-block;width: 200px;text-align: right; color: #00ff00;">
     Output: <span style="display:inline-block;width:40px" id="output">36</span>
   </div>
   <div style="display:inline-block;width:600px;margin-top: 10px;margin-left: 20px" id="sliderOutput" class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 60%;"></span></div>
