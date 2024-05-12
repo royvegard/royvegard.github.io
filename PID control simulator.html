@@ -25,17 +25,23 @@
         key: "watertank 1",
         func: "pid.outMax = 100.0;\n"
           + "pid.outMin = 0.0;\n\n"
-          + "if (user.t != undefined && user.h != undefined) {\n"
-          + "    user.q_in = 2.5e-7 * output + 7.0e-7 * noise;\n"
-          + "    if (user.q_in < 0.0) { user.q_in = 0.0 };\n"
-          + "    user.r_2 = 0.057; // m\n"
-          + "    user.r_1 = 0.087; // m\n"
-          + "    user.F = Math.PI * user.r_1^2 - Math.PI * user.r_2^2;\n"
-          + "    user.k = 4.0107e-5;\n"
+          + "if (user.t != undefined && user.h != undefined && user.valve_position_1 != undefined) {\n"
           + "    user.t_1 = user.t; // ms\n"
           + "    user.t = time; // ms\n"
+          + "    user.dt = (user.t - user.t_1) / 1000.0; // s\n"
+          + "    var valve_dp = (output - user.valve_position_1) / ((6.0 / user.valve_speed) / user.dt);\n"
+          + "    var max_valve_speed = user.valve_speed / 8.0;\n"
+          + "    if (valve_dp > max_valve_speed) { valve_dp = max_valve_speed; }\n"
+          + "    if (valve_dp < -max_valve_speed) { valve_dp = -max_valve_speed; }\n"
+          + "    user.valve_position = user.valve_position_1 + valve_dp;\n"
+          + "    user.valve_position_1 = user.valve_position;\n"
+          + "    user.q_in = 2.5e-3 * user.valve_position + 7.0e-3 * noise;\n"
+          + "    if (user.q_in < 0.0) { user.q_in = 0.0 };\n"
+          + "    user.r_2 = 0.057; // m\n"
+          + "    user.r_1 = 0.57; // m\n"
+          + "    user.F = Math.PI * user.r_1 * user.r_1 - Math.PI * user.r_2 * user.r_2;\n"
+          + "    user.k = 4.0107e-1;\n"
           + "    user.h_1 = user.h;\n"
-          + "    user.dt = (user.t - user.t_1) * 10.0; // s\n"
           + "    if (user.h_1 > 0.0) {\n"
           + "        user.q_out = user.k * Math.sqrt(user.h_1);\n"
           + "        user.dh =  user.dt * (user.q_in - user.q_out) / user.F;\n"
@@ -52,9 +58,10 @@
           + "else {\n"
           + "    user.t = time;\n"
           + "    user.h = 0.0001\n"
+          + "    user.valve_position_1 = 0.0;\n"
           + "}\n"
           + "return user.h * 1000.0;\n",
-        sampletime: 100,
+        sampletime: 200,
         setpoint: 100,
         noise: 3,
         Kp: 0.1,
@@ -66,19 +73,25 @@
         key: "watertank 2",
         func: "pid.outMax = 100.0;\n"
           + "pid.outMin = 0.0;\n\n"
-          + "if (user.t != undefined && user.h != undefined) {\n"
-          + "    user.q_in = 2.5e-7 * 25.0 + 7.0e-7 * noise;\n"
+          + "if (user.t != undefined && user.h != undefined && user.valve_position_1 != undefined) {\n"
+          + "    user.q_in = 2.5e-3 * 25.0 + 7.0e-3 * noise;\n"
           + "    if (user.q_in < 0.0) { user.q_in = 0.0 };\n"
           + "    user.r_2 = 0.057; // m\n"
-          + "    user.r_1 = 0.087; // m\n"
-          + "    user.F = Math.PI * user.r_1^2 - Math.PI * user.r_2^2;\n"
+          + "    user.r_1 = 0.57; // m\n"
+          + "    user.F = Math.PI * user.r_1 * user.r_1 - Math.PI * user.r_2 * user.r_2;\n"
           + "    user.k = 4.0107e-5;\n"
           + "    user.t_1 = user.t; // ms\n"
           + "    user.t = time; // ms\n"
           + "    user.h_1 = user.h;\n"
-          + "    user.dt = (user.t - user.t_1) * 10.0; // s\n"
+          + "    user.dt = (user.t - user.t_1) / 1000.0; // s\n"
+          + "    var valve_dp = (output - user.valve_position_1) / ((6.0 / user.valve_speed) / user.dt);\n"
+          + "    var max_valve_speed = user.valve_speed / 8.0;\n"
+          + "    if (valve_dp > max_valve_speed) { valve_dp = max_valve_speed; }\n"
+          + "    if (valve_dp < -max_valve_speed) { valve_dp = -max_valve_speed; }\n"
+          + "    user.valve_position = user.valve_position_1 + valve_dp;\n"
+          + "    user.valve_position_1 = user.valve_position;\n"
           + "    if (user.h_1 > 0.0) {\n"
-          + "        user.q_out = 1.6e-2 * output * user.k * Math.sqrt(user.h_1);\n"
+          + "        user.q_out = 1.6e2 * user.valve_position * user.k * Math.sqrt(user.h_1);\n"
           + "        user.dh =  user.dt * (user.q_in - user.q_out) / user.F;\n"
           + "        user.h = user.h + user.dh;\n"
           + "    }\n"
@@ -93,9 +106,10 @@
           + "else {\n"
           + "    user.t = time;\n"
           + "    user.h = 0.0001\n"
+          + "    user.valve_position_1 = 0.0;\n"
           + "}\n"
           + "return user.h * 1000.0;\n",
-        sampletime: 100,
+        sampletime: 200,
         setpoint: 100,
         noise: 3,
         Kp: 0.1,
@@ -106,13 +120,15 @@
     ];
 
 
-    var SAMPLES = 200;
+    var SAMPLES = 400;
     var proc = procs[0];
     var sampleTime = 50;
     var plInput = new MakeDraw();
     var plOutput = new MakeDraw();
     var plSetpoint = new MakeDraw();
+    var plValve = new MakeDraw();
     var setpoint = 50;
+    var valvespeed = 50;
     var input = 50;
     var output = 0;
     var user = new Object();
@@ -167,36 +183,32 @@
         noise = sum / samples;
 
         //input = Math.sin(time/1000)*40 + noise + output;
+        //console.log(user);
         input = proc.compute(time, input, noise, output, user);
 
-        if (autoTuning) {
-          pidTuner.setInput(input);
-          var res = pidTuner.runtime(output);
-          if (res != 0) {
-            // tuning done
-            autoTuning = false;
-            console.log("tuning done");
-            var kp = pidTuner.getKp();
-            var ki = pidTuner.getKi();
-            var kd = pidTuner.getKd();
-            console.log("tunings " + kp + "," + ki + "," + kd);
-            //pid.setTunings(kp,ki,kd);
-            $("#sliderKp").slider("value", kp);
-            $("#sliderKi").slider("value", ki);
-            $("#sliderKd").slider("value", kd);
-            autoTuningChanged();
-          }
-          output = pidTuner.getOutput();
-          //console.log("PID_Atune.runtime output " + output);
-        } else {
-          pid.setInput(input);
-          pid.compute();
-          output = pid.getOutput();
-        }
-
-        addPlotData(plInput, input);
         addPlotData(plSetpoint, setpoint);
+        addPlotData(plInput, input);
         addPlotData(plOutput, output);
+
+        if (user.valve_position) {
+          $("#sliderValvePosition").slider("value", user.valve_position);
+          $("#valve_position").text($("#sliderValvePosition").slider("value"));
+          addPlotData(plValve, user.valve_position);
+        }
+      }
+
+      animateDrawing();
+
+      setTimeout(process, 50);
+    }
+
+    function process_pid() {
+      time = (new Date).getTime();
+      $("#time").text(time);
+      if (run) {
+        pid.setInput(input);
+        pid.compute();
+        output = pid.getOutput();
 
         if (control) {
           $("#sliderOutput").slider("value", output);
@@ -204,9 +216,7 @@
         }
       }
 
-      animateDrawing();
-
-      setTimeout(process, sampleTime);
+      setTimeout(process_pid, sampleTime);
     }
 
 
@@ -227,6 +237,8 @@
       func.value = proc.func;
 
       pid.setDirection = proc.Direction;
+
+      user.valve_speed = valvespeed;
       processFuncChanged();
     }
 
@@ -238,9 +250,16 @@
       updateSliderText();
     }
 
+    function valvespeedChanged() {
+      valvespeed = $("#sliderValveSpeed").slider("value");
+      console.log("valvespeed " + valvespeed);
+      user.valve_speed = valvespeed;
+      updateSliderText();
+    }
+
     function outputChanged() {
       output = $("#sliderOutput").slider("value");
-      console.log("output " + output);
+      //console.log("output " + output);
       pid.setOutput(output);
       updateSliderText();
     }
@@ -271,6 +290,7 @@
     function updateSliderText() {
       $("#process").text(procs[$("#sliderProcess").slider("value")].key);
       $("#setpoint").text($("#sliderSetpoint").slider("value"));
+      $("#valvespeed").text($("#sliderValveSpeed").slider("value"));
       $("#output").text($("#sliderOutput").slider("value"));
       $("#noise").text($("#sliderNoise").slider("value"));
       $("#sampletime").text($("#sliderSampletime").slider("value"));
@@ -338,9 +358,10 @@
       });
 
       // plots
-      initPlot(0, "plot1", "control input", plInput, 'rgba(255,0,0,1)', 0, 200, 0);
-      initPlot(1, "plot1", "control setpoint", plSetpoint, 'rgba(0,0,255,1)', 0, 200, 0);
+      initPlot(0, "plot1", "control setpoint", plSetpoint, 'rgba(0,0,255,1)', 0, 200, 0);
+      initPlot(1, "plot1", "control input", plInput, 'rgba(255,0,0,1)', 0, 200, 0);
       initPlot(2, "plot1", "control output", plOutput, 'rgba(0,255,0,1)', 0, 200, 0);
+      initPlot(3, "plot1", "control valve", plValve, 'rgba(0,179,255,1)', 0, 200, 0);
 
       $("#sliderProcess").slider({
         min: 0,
@@ -360,10 +381,10 @@
       });
 
       $("#sliderSampletime").slider({
-        min: 50,
-        max: 1000,
+        min: 100,
+        max: 10000,
         step: 10,
-        value: 50,
+        value: 100,
         slide: function (event, ui) { sampleTimeChanged(); },
         change: function (event, ui) { sampleTimeChanged(); },
       });
@@ -377,20 +398,35 @@
         change: function (event, ui) { setpointChanged(); },
       });
 
+      $("#sliderValveSpeed").slider({
+        min: 1,
+        max: 100,
+        step: 1,
+        value: 50,
+        slide: function (event, ui) { valvespeedChanged(); },
+        change: function (event, ui) { valvespeedChanged(); },
+      });
+
       $("#sliderOutput").slider({
         min: 0,
         max: 100,
-        step: 1,
+        step: 0.1,
         value: 50,
         slide: function (event, ui) { outputChanged(); },
         change: function (event, ui) { outputChanged(); },
       });
 
+      $("#sliderValvePosition").slider({
+        min: 0,
+        max: 100,
+        step: 0.01,
+        value: 50,
+      });
 
       $("#sliderKp").slider({
         min: 0,
-        max: 25,
-        step: 0.01,
+        max: 20,
+        step: 0.001,
         value: 0.5,
         slide: function (event, ui) { tuningsChanged(); },
         change: function (event, ui) { tuningsChanged(); },
@@ -399,7 +435,7 @@
       $("#sliderKi").slider({
         min: 0,
         max: 20,
-        step: 0.01,
+        step: 0.001,
         value: 0.5,
         slide: function (event, ui) { tuningsChanged(); },
         change: function (event, ui) { tuningsChanged(); },
@@ -408,7 +444,7 @@
       $("#sliderKd").slider({
         min: 0,
         max: 5,
-        step: 0.01,
+        step: 0.001,
         value: 0,
         slide: function (event, ui) { tuningsChanged(); },
         change: function (event, ui) { tuningsChanged(); },
@@ -425,6 +461,7 @@
       processChanged();
       updateSliderText();
       process();
+      process_pid();
 
 
       start();
@@ -488,7 +525,7 @@
           }
         });
         gsap.set(valveIn, {
-          fill: "#00ff00"
+          fill: "#00b3ff"
         });
         gsap.set(valveOut, {
           fill: "#000000"
@@ -505,14 +542,14 @@
           fill: "#000000"
         });
         gsap.set(valveOut, {
-          fill: "#00ff00"
+          fill: "#00b3ff"
         });
 
       }
 
       gsap.set(activeDiaphragm, {
         attr: {
-          d: "M 10 0 Q 30 " + (-output) + " 50 0 Z"
+          d: "M 10 0 Q 30 " + (-user.valve_position) + " 50 0 Z"
         }
       });
 
@@ -559,10 +596,28 @@
   </div>
 
   <div>
+    <div style="display:inline-block;width: 200px;text-align: right; color: #00b3ff;">
+      Valve speed: <span style="display:inline-block;width:40px" id="valvespeed">36</span>
+    </div>
+    <div style="display:inline-block;width:600px;margin-top: 10px;margin-left: 20px" id="sliderValveSpeed"
+      class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span
+        class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 60%;"></span></div>
+  </div>
+
+  <div>
     <div style="display:inline-block;width: 200px;text-align: right; color: #00ff00;">
       Output: <span style="display:inline-block;width:40px" id="output">36</span>
     </div>
     <div style="display:inline-block;width:600px;margin-top: 10px;margin-left: 20px" id="sliderOutput"
+      class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span
+        class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 60%;"></span></div>
+  </div>
+
+  <div>
+    <div style="display:inline-block;width: 200px;text-align: right; color: #00b3ff;">
+      Valve position: <span style="display:inline-block;width:40px" id="valve_position">36</span>
+    </div>
+    <div style="display:inline-block;width:600px;margin-top: 10px;margin-left: 20px" id="sliderValvePosition"
       class="ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all"><span
         class="ui-slider-handle ui-state-default ui-corner-all" tabindex="0" style="left: 60%;"></span></div>
   </div>
