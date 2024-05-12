@@ -9,7 +9,7 @@
  */
 
 "use strict";
-var PID = function(Input, Setpoint, Kp, Ki, Kd, ControllerDirection) {
+var PID = function (Input, Setpoint, Kp, Ki, Kd, ControllerDirection) {
     this.input = Input;
     this.mySetpoint = Setpoint;
     this.inAuto = false;
@@ -29,16 +29,16 @@ PID.MANUAL = 0;
 PID.DIRECT = 0;
 PID.REVERSE = 1;
 
-PID.prototype.setInput = function(current_value) {
+PID.prototype.setInput = function (current_value) {
     this.input = current_value;
 };
 
-PID.prototype.setPoint = function(current_value) {
+PID.prototype.setPoint = function (current_value) {
     this.mySetpoint = current_value;
     //alert(current_value);
 };
 
-PID.prototype.millis = function() {
+PID.prototype.millis = function () {
     var d = new Date();
     return d.getTime();
 };
@@ -50,7 +50,7 @@ PID.prototype.millis = function() {
  * pid Output needs to be computed.  returns true when the output is computed,
  * false when nothing has been done.
  */
-PID.prototype.compute = function() {
+PID.prototype.compute = function () {
     if (!this.inAuto) {
         return false;
     }
@@ -92,7 +92,7 @@ PID.prototype.compute = function() {
  * it's called automatically from the constructor, but tunings can also
  * be adjusted on the fly during normal operation
  */
-PID.prototype.setTunings = function(Kp, Ki, Kd) {
+PID.prototype.setTunings = function (Kp, Ki, Kd) {
     if (Kp < 0 || Ki < 0 || Kd < 0) {
         return;
     }
@@ -103,19 +103,16 @@ PID.prototype.setTunings = function(Kp, Ki, Kd) {
 
     this.SampleTimeInSec = (this.SampleTime) / 1000;
     this.kp = Kp;
-    this.ki = Ki * this.SampleTimeInSec;
-    this.kd = Kd / this.SampleTimeInSec;
+    this.ki = Ki;
+    this.kd = Kd;
 };
 
 /**
  * SetSampleTime(...)
  * sets the period, in Milliseconds, at which the calculation is performed	
  */
-PID.prototype.setSampleTime = function(NewSampleTime) {
+PID.prototype.setSampleTime = function (NewSampleTime) {
     if (NewSampleTime > 0) {
-        var ratio = NewSampleTime / (1.0 * this.SampleTime);
-        this.ki *= ratio;
-        this.kd /= ratio;
         this.SampleTime = Math.round(NewSampleTime);
     }
 };
@@ -124,7 +121,7 @@ PID.prototype.setSampleTime = function(NewSampleTime) {
  * SetOutput( )
  * Set output level if in manual mode
  */
-PID.prototype.setOutput = function(val) {
+PID.prototype.setOutput = function (val) {
     if (val > this.outMax) {
         this.myOutput = val;
     }
@@ -142,7 +139,7 @@ PID.prototype.setOutput = function(val) {
  * be doing a time window and will need 0-8000 or something.  or maybe they'll
  * want to clamp it from 0-125.  who knows.  at any rate, that can all be done here.
  */
-PID.prototype.setOutputLimits = function(Min, Max) {
+PID.prototype.setOutputLimits = function (Min, Max) {
     if (Min >= Max) {
         return;
     }
@@ -172,7 +169,7 @@ PID.prototype.setOutputLimits = function(Min, Max) {
  * when the transition from manual to auto occurs, the controller is
  * automatically initialized
  */
-PID.prototype.setMode = function(Mode) {
+PID.prototype.setMode = function (Mode) {
     var newAuto;
     if (Mode == 0 || Mode.toString().toLowerCase() == 'automatic' || Mode.toString().toLowerCase() == 'auto') {
         newAuto = 1;
@@ -195,7 +192,7 @@ PID.prototype.setMode = function(Mode) {
  * does all the things that need to happen to ensure a bumpless transfer
  * from manual to automatic mode.
  */
-PID.prototype.initialize = function() {
+PID.prototype.initialize = function () {
     this.ITerm = this.myOutput;
     this.lastInput = this.input;
     if (this.ITerm > this.outMax) {
@@ -213,7 +210,7 @@ PID.prototype.initialize = function() {
  * know which one, because otherwise we may increase the output when we should
  * be decreasing.  This is called from the constructor.
  */
-PID.prototype.setControllerDirection = function(ControllerDirection) {
+PID.prototype.setControllerDirection = function (ControllerDirection) {
     if (ControllerDirection == 0 || ControllerDirection.toString().toLowerCase() == 'direct') {
         this.setDirection = 1;
     }
@@ -231,35 +228,35 @@ PID.prototype.setControllerDirection = function(ControllerDirection) {
  * functions query the internal state of the PID.  they're here for display 
  * purposes.  this are the functions the PID Front-end uses for example
  */
-PID.prototype.getKp = function() {
+PID.prototype.getKp = function () {
     return this.dispKp;
 };
 
-PID.prototype.getKd = function() {
+PID.prototype.getKd = function () {
     return this.dispKd;
 };
 
-PID.prototype.getKi = function() {
+PID.prototype.getKi = function () {
     return this.dispKi;
 };
 
-PID.prototype.getMode = function() {
+PID.prototype.getMode = function () {
     return this.inAuto ? "Auto" : "Manual";
 };
 
-PID.prototype.getDirection = function() {
+PID.prototype.getDirection = function () {
     return this.controllerDirection;
 };
 
-PID.prototype.getOutput = function() {
+PID.prototype.getOutput = function () {
     return this.myOutput;
 };
 
-PID.prototype.getInput = function() {
+PID.prototype.getInput = function () {
     return this.input;
 };
 
-PID.prototype.getSetPoint = function() {
+PID.prototype.getSetPoint = function () {
     return this.mySetpoint;
 };
 
