@@ -69,7 +69,7 @@ function MakeDraw() {
     ctx.beginPath();
 
 
-    spacH = this.spacing("horizontal", this.data.length) * 17.5;
+    spacH = this.spacing("horizontal", this.data.length) * 9.60 * 2.0;
     for (var i = 0, len = this.data.length; i < len; i++) {
       precalc = i * spacH + this.offsetL;
       ctx.moveTo(precalc, 1);
