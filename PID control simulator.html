@@ -122,6 +122,7 @@
 
     var SAMPLES = 400;
     var proc = procs[0];
+    var init_time = new Date;
     var sampleTime = 50;
     var plInput = new MakeDraw();
     var plOutput = new MakeDraw();
@@ -170,8 +171,8 @@
 
 
     function process() {
-      time = (new Date).getTime();
-      $("#time").text(time);
+      time = (new Date);
+      $("#time").text(time.getTime() - init_time.getTime());
       if (run) {
         var noiseStrength = $("#sliderNoise").slider("value");
         var i;
@@ -203,8 +204,6 @@
     }
 
     function process_pid() {
-      time = (new Date).getTime();
-      $("#time").text(time);
       if (run) {
         pid.setInput(input);
         pid.compute();
@@ -382,7 +381,7 @@
 
       $("#sliderSampletime").slider({
         min: 100,
-        max: 10000,
+        max: 5000,
         step: 10,
         value: 100,
         slide: function (event, ui) { sampleTimeChanged(); },
@@ -425,7 +424,7 @@
 
       $("#sliderKp").slider({
         min: 0,
-        max: 20,
+        max: 10,
         step: 0.001,
         value: 0.5,
         slide: function (event, ui) { tuningsChanged(); },
@@ -434,7 +433,7 @@
 
       $("#sliderKi").slider({
         min: 0,
-        max: 20,
+        max: 10,
         step: 0.001,
         value: 0.5,
         slide: function (event, ui) { tuningsChanged(); },
@@ -443,7 +442,7 @@
 
       $("#sliderKd").slider({
         min: 0,
-        max: 5,
+        max: 10,
         step: 0.001,
         value: 0,
         slide: function (event, ui) { tuningsChanged(); },
@@ -492,13 +491,13 @@
 
       </g>
 
-      <g id="valve_in" style="fill:#00ff00; stroke:black; stroke-width:2" transform="translate(300, 80)">
+      <g id="valve_in" style="fill:#00b3ff; stroke:black; stroke-width:2" transform="translate(300, 80)">
         <line x1="30" y1="20" x2="30" y2="-20" />
         <polygon points="0,0 0,40 60,0 60,40 0,0" />
         <path id="diaphragm_in" transform="translate(0, -20)" d="M 10 0 Q 30 -100 50 0 Z" />
       </g>
 
-      <g id="valve_out" style="fill:#0000ff; stroke:black; stroke-width:2" transform="translate(300, 500)">
+      <g id="valve_out" style="fill:#00b3ff; stroke:black; stroke-width:2" transform="translate(300, 500)">
         <line x1="30" y1="20" x2="30" y2="-20" />
         <polygon points="0,0 0,40 60,0 60,40 0,0" />
         <path id="diaphragm_out" transform="translate(0, -20)" d="M 10 0 Q 30 -100 50 0 Z" />
