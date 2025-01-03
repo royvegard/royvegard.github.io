@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>"Diceware"</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="ordliste.js"></script>
+    <style>
+        div.words {
+            padding: 1em;
+            background: #eee;
+            white-space: pre-wrap;
+            font-family: monospace;
+            margin: 1em 0;
+        }
+
+        .warning {
+            color: red;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        input {
+            width: 3em;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Ordgenerator ("Diceware")</h1>
+    <p>
+        Ordlista som brukes er basert på bokmålslista fra <a href="http://www.edd.uio.no/prosjekt/ordbanken/">Norsk
+            ordbank</a>.
+        Ord kortere enn tre tegn eller lengre enn seks, egennavn (f.eks. «London»), ord med tegn med aksenter eller
+        symboler utover a-å (f.eks. «kafé»), samt oppføringer med bindestrek eller mellomrom (f.eks «berg-og-dal-bane»)
+        er filtrert bort.
+        Det er ikke gjort noen filtrering på uvanlige eller potensielt støtende ord.
+        Denne versjonen av ordlista har <em id="wlen"></em> unike oppføringer.
+    </p>
+    <p>
+        Ordgeneratoren gjør alle sine beregninger i nettleseren. Resultater blir kun lagret i minnet for nettleseren.
+        Ordgeneratoren vil benytte <a
+            href="https://developer.mozilla.org/en-US/docs/Web/API/RandomSource/getRandomValues">RandomSource.getRandomValues()</a>
+        for slumptallsgenerering om crypto-grensesnittet er tilgjengelig i nettleseren.
+        Hvis ikke, så faller den tilbake på <a
+            href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random">Math.random()</a>,
+        noe som nødvendigvis ikke vil gi like "tilfeldige" resultater.
+    </p>
+    <p>
+        <small>Siden Bokmålslista er distribuert under <a
+                href="http://www.gnu.org/licenses/gpl.html">GPL-betingelser</a>, så gjelder dette naturligvis også for
+            denne Ordgeneratoren.</small>
+    </p>
+    <form><label>Generer <input type="number" maxlength="3" value="5"> ord.</label> <button>OK</button>
+        <small>(Min 4, maks 100)</small>
+    </form>
+    <div class="words">
+        <noscript>
+            <h4 class="warning">Du trenger en nettleser som støtter javascript for å kunne bruke ordgeneratoren!</h4>
+        </noscript>
+    </div>
+    <p>
+        Permutasjoner som må sjekkes for å brute force: <em id="char_permutations"></em>
+    </p>
+    <p>
+        Permutasjoner som må sjekkes for å brute force når man kjenner ordlisten og antall ord brukt: <em
+            id="word_permutations"></em>
+    </p>
+    <div class="warning hidden">NB: Nettleseren din støtter ikke crypto-grensesnittet. Ordene some genereres er ikke
+        helt tilfeldige.</div>
+
+
+    <script type="text/javascript">
+        (function () {
+            var wlen = document.l.length; // Ordlistas lengde
+            var words;
+            var wordcount = 5;
+            var word_permutations;
+            var char_permutations;
+
+            document.getElementById("wlen").innerHTML = `${wlen}`;
+
+            var generate = function () {
+                if (window.crypto) {
+                    words = new Uint16Array(wordcount);
+                    window.crypto.getRandomValues(words);
+                    words = Array.prototype.map.call(words, function (e) {
+                        return document.l[e % wlen];
+                    });
+                } else {
+                    document.querySelector('div.warning').style.display = "block";
+                    words = Array.apply(null, Array(wordcount)).map(function () {
+                        return document.l[(Math.random() * wlen) | 0];
+                    });
+                }
+
+                var uppercase_words = 0;
+                for (w in words) {
+                    if (window.crypto.getRandomValues(new Uint8Array(1)) < 256 * 0.25 && uppercase_words < wordcount - 1) {
+                        words[w] = words[w].toUpperCase();
+                        uppercase_words += 1;
+                    }
+                }
+                if (uppercase_words == 0) {
+                    var w = window.crypto.getRandomValues(new Uint8Array(1)) % wordcount;
+                    words[w] = words[w].toUpperCase();
+                }
+
+                document.querySelector('div.words').innerHTML = words.join("-");
+
+                word_permutations = (wlen * 2) ** wordcount;
+                char_permutations = (29 * 2 + 1) ** words.join("-").length;
+                document.getElementById("char_permutations").innerHTML = `${char_permutations}`;
+                document.getElementById("word_permutations").innerHTML = `${word_permutations}`;
+            };
+
+            generate();
+
+            document.querySelector('form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                wordcount = parseInt(document.querySelector('input').value) || 4;
+                (wordcount > 100) && (wordcount = 100);
+                (wordcount < 4) && (wordcount = 4);
+                document.querySelector('input').value = wordcount;
+                generate();
+            });
+        })();
+    </script>
+</body>
+
+</html>
