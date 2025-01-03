@@ -55,7 +55,7 @@
             denne Ordgeneratoren.</small>
     </p>
     <form><label>Generer <input type="number" maxlength="3" value="5"> ord.</label> <button>OK</button>
-        <small>(Min 4, maks 100)</small>
+        <small>(Min 1, maks 100)</small>
     </form>
     <div class="words">
         <noscript>
@@ -63,14 +63,30 @@
         </noscript>
     </div>
     <p>
-        Permutasjoner som må sjekkes for å brute force: <em id="char_permutations"></em>
+        Passordlengde: <em id="pw_length"></em>
     </p>
     <p>
-        Permutasjoner som må sjekkes for å brute force når man kjenner ordlisten og antall ord brukt: <em
-            id="word_permutations"></em>
+        Max tid å cracke passord: <em id="char_permutations"></em> år. <br />
+        <small>Når man vet at passordet betår av store og små bokstaver, og et spesialtegn -.</small>
+    </p>
+    <p>
+        Max tid å cracke passfrase: <em id="word_permutations"></em> år. <br />
+        <small>Når man vet at passfrasen betår av ord fra ordlisten, med små eller store bokstaver, og man bruker <em
+                id="wordcount"></em> ord.</small>
     </p>
     <div class="warning hidden">NB: Nettleseren din støtter ikke crypto-grensesnittet. Ordene some genereres er ikke
-        helt tilfeldige.</div>
+        helt tilfeldige.
+    </div>
+
+    <p>
+        Hive Systems publiserer årlig passordtabeller som viser hvor gode passord av forskjellig lengde og kompleksitet
+        er.
+    </p>
+    <p>
+        <a href="https://www.hivesystems.com/password">
+            <img src="Hive Systems Password Table - 2024 Rectangular.png" width="1000px">
+        </a>
+    </p>
 
 
     <script type="text/javascript">
@@ -78,10 +94,31 @@
             var wlen = document.l.length; // Ordlistas lengde
             var words;
             var wordcount = 5;
-            var word_permutations;
-            var char_permutations;
+            var crackspeed = 2_500_000; // Hashes per second
 
             document.getElementById("wlen").innerHTML = `${wlen}`;
+
+            function formatNumber(num, precision = 0) {
+                const map = [
+                    { suffix: ' fantasillion', threshold: 1e24 },
+                    { suffix: ' trilliard', threshold: 1e21 },
+                    { suffix: ' trillion', threshold: 1e18 },
+                    { suffix: ' billiard', threshold: 1e15 },
+                    { suffix: ' billion', threshold: 1e12 },
+                    { suffix: ' milliard', threshold: 1e9 },
+                    { suffix: ' million', threshold: 1e6 },
+                    { suffix: ' tusen', threshold: 1e3 },
+                    { suffix: '', threshold: 1 },
+                ];
+
+                const found = map.find((x) => Math.abs(num) >= x.threshold);
+                if (found) {
+                    const formatted = (num / found.threshold).toFixed(precision) + found.suffix;
+                    return formatted;
+                }
+
+                return num;
+            }
 
             var generate = function () {
                 if (window.crypto) {
@@ -111,19 +148,24 @@
 
                 document.querySelector('div.words').innerHTML = words.join("-");
 
-                word_permutations = (wlen * 2) ** wordcount;
-                char_permutations = (29 * 2 + 1) ** words.join("-").length;
-                document.getElementById("char_permutations").innerHTML = `${char_permutations}`;
-                document.getElementById("word_permutations").innerHTML = `${word_permutations}`;
+                var pw_length = words.join("-").length;
+                var word_permutations = (wlen * 2) ** wordcount;
+                var char_permutations = (29 * 2 + 1) ** pw_length;
+                var char_time_to_crack = formatNumber(char_permutations / crackspeed / (365 * 24 * 60 * 60));
+                var word_time_to_crack = formatNumber(word_permutations / crackspeed / (365 * 24 * 60 * 60));
+                document.getElementById("pw_length").innerHTML = `${pw_length}`;
+                document.getElementById("char_permutations").innerHTML = `${char_time_to_crack}`;
+                document.getElementById("word_permutations").innerHTML = `${word_time_to_crack}`;
+                document.getElementById("wordcount").innerHTML = `${wordcount}`;
             };
 
             generate();
 
             document.querySelector('form').addEventListener('submit', function (e) {
                 e.preventDefault();
-                wordcount = parseInt(document.querySelector('input').value) || 4;
+                wordcount = parseInt(document.querySelector('input').value) || 1;
                 (wordcount > 100) && (wordcount = 100);
-                (wordcount < 4) && (wordcount = 4);
+                (wordcount < 1) && (wordcount = 1);
                 document.querySelector('input').value = wordcount;
                 generate();
             });
