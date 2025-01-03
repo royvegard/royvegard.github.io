@@ -55,7 +55,13 @@
                 href="http://www.gnu.org/licenses/gpl.html">GPL-betingelser</a>, så gjelder dette naturligvis også for
             denne Ordgeneratoren.</small>
     </p>
-    <form><label>Generer <input type="number" maxlength="3" value="5"> ord.</label> <button>OK</button>
+    <form>
+        <label>Generer <input type="number" maxlength="3" value="5" />
+            <select name="dict" id="dict">
+                <option value="norwegian">Norsk</option>
+                <option value="english">Engelsk</option>
+            </select>
+            ord.</label> <button>OK</button>
         <small>(Min 1, maks 100)</small>
     </form>
     <div class="words">
@@ -92,12 +98,12 @@
 
     <script type="text/javascript">
         (function () {
-            var wlen = document.l.length; // Ordlistas lengde
+            var dict_id = "norwegian";
+            var dict;
+            var wlen;
             var words;
             var wordcount = 5;
             var crackspeed = 2_500_000; // Hashes per second
-
-            document.getElementById("wlen").innerHTML = `${wlen}`;
 
             function formatNumber(num, precision = 0) {
                 const map = [
@@ -122,16 +128,29 @@
             }
 
             var generate = function () {
+                switch (dict_id) {
+                    case "norwegian":
+                        dict = document.l;
+                        break;
+                    case "english":
+                        dict = document.e;
+                        break;
+                    default:
+                        dict = document.l;
+                }
+
+                wlen = dict.length;
+
                 if (window.crypto) {
                     words = new Uint16Array(wordcount);
                     window.crypto.getRandomValues(words);
                     words = Array.prototype.map.call(words, function (e) {
-                        return document.l[e % wlen];
+                        return dict[e % wlen];
                     });
                 } else {
                     document.querySelector('div.warning').style.display = "block";
                     words = Array.apply(null, Array(wordcount)).map(function () {
-                        return document.l[(Math.random() * wlen) | 0];
+                        return dict[(Math.random() * wlen) | 0];
                     });
                 }
 
@@ -158,6 +177,7 @@
                 document.getElementById("char_permutations").innerHTML = `${char_time_to_crack}`;
                 document.getElementById("word_permutations").innerHTML = `${word_time_to_crack}`;
                 document.getElementById("wordcount").innerHTML = `${wordcount}`;
+                document.getElementById("wlen").innerHTML = `${wlen}`;
             };
 
             generate();
@@ -168,6 +188,7 @@
                 (wordcount > 100) && (wordcount = 100);
                 (wordcount < 1) && (wordcount = 1);
                 document.querySelector('input').value = wordcount;
+                dict_id = document.querySelector('select').value;
                 generate();
             });
         })();
